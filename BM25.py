@@ -23,7 +23,7 @@ class BM25():
             for k in tmp.keys():
                 self.df[k] = self.df.get(k, 0) + 1
         for k, v in self.df.items():
-            self.idf[k] = math.log(self.D - v + 0.5) - math.log(self.D - v + 0.5)
+            self.idf[k] = math.log(self.D - v + 0.5) - math.log(v + 0.5)
     
     def sim(self, doc, index):
         score = 0
@@ -32,13 +32,15 @@ class BM25():
                 continue
             d = len(self.docs[index])
             score += (self.idf[word]*self.f[index][word]*(self.k1 + 1)) / (self.f[index][word] + self.k1 * (1 - self.b + self.b * d / self.avgld))
+        
+        return score
     
     def simall(self, doc):
         scores = []
         for index in range(self.D):
             score = self.sim(doc, index)
             scores.append(score)
-        return score
+        return scores
 
 if __name__ == '__main__':
     with open('test.txt', 'r', encoding='utf8') as f:
@@ -51,7 +53,7 @@ if __name__ == '__main__':
         words = list(jieba.cut(sent))
         words = [word for word in words if word not in stopwords]
         doc.append(words)
-    print(words)
+    print(doc)
     s = BM25(doc)
     print(s.f)
     print(s.idf)
